@@ -1,3 +1,4 @@
+const prettyjson = require('prettyjson')
 const _ = require('lodash')
 
 const FUNCTION = '$$simplydit'
@@ -37,8 +38,9 @@ class ExpectedCall {
       }
     }
     if (this.expectedArguments[0] !== ANYTHING && !_.isEqual(this.expectedArguments, args)) {
+      const opts = { noColor: true }
       return {
-        error: `${JSON.stringify(args)}, expected ${JSON.stringify(this.expectedArguments)}`
+        error: `${prettyjson.render(args, opts)}, expected ${prettyjson.render(this.expectedArguments, opts)}`
       }
     }
     this.called = true
