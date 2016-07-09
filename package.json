@@ -1,6 +1,6 @@
 {
   "name": "simplydit",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "A mocking library with inversion of control principles that simply works.",
   "main": "compiled.js",
   "scripts": {
