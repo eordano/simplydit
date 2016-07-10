@@ -32,9 +32,6 @@ describe('my test', () => {
       .andReturn(simplydit.promise('Fake user')) // simplydit.promise is just
                                                  // value => new Promise(resolve => resolve(value))
 
-    // If we have some kind of logic layer on top of the DB, and we are using some kind of
-    // inversion of control (like this example), we can abstract away stateful, impure
-    // things like the database connection.
     // This example test assumes that this "Service", when asked to "getUser",
     // internally calls "db.user.findOne()". Let's test it.
     const service = new Service(db)
