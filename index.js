@@ -108,8 +108,13 @@ function mockFunction(name) {
   return mock
 }
 
+function createMockFunc(name) {
+  return mock(name, FUNCTION)
+}
+
 module.exports = {
   mock: createMock,
+  mockFunc: createMockFunc,
   func: FUNCTION,
   anything: ANYTHING,
   promise: function(value) {
