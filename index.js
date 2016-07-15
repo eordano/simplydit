@@ -112,9 +112,34 @@ function createMockFunc(name) {
   return mock(name, FUNCTION)
 }
 
+function spy(name, response, logger) {
+  const mock = function() {
+    const result = _.isFunction(response)
+      ? response.apply(this, arguments)
+      : response
+    if (logger) {
+      logger(arguments, result, name)
+    }
+    return result
+  }
+  mock.replyWith = function(newResponse) {
+    response = newResponse
+    return this
+  }
+  mock.verify = function() {}
+  return mock
+}
+
+function logCalls(name, response) {
+  return spy(name, response, function(args) {
+    console.log(`${name} called with ${JSON.stringify(args)}`)
+  })
+}
+
 module.exports = {
   mock: createMock,
   mockFunc: createMockFunc,
+  spy: spy,
   func: FUNCTION,
   anything: ANYTHING,
   promise: function(value) {
