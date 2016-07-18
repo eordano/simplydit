@@ -42,9 +42,6 @@ class ExpectedCall {
       }
     }
     this.called = true
-    if (this.tap) {
-      this.tap.apply(that, args)
-    }
     if (this.whenCalled === 'return') {
       return { result: this.returnValue }
     }
@@ -52,10 +49,6 @@ class ExpectedCall {
       args[this.argumentIndex].apply(that, this.callbackArguments)
       return 'callback called'
     }
-  }
-  tap(tapFunc) {
-    this.tap = tapFunc
-    return this
   }
 }
 
