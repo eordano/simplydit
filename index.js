@@ -42,19 +42,30 @@ class ExpectedCall {
       }
     }
     this.called = true
+    if (this.tap) {
+      this.tap.apply(that, args)
+    }
     if (this.whenCalled === 'return') {
       return { result: this.returnValue }
     }
     if (this.whenCalled === 'callback') {
       args[this.argumentIndex].apply(that, this.callbackArguments)
-      return {}
+      return 'callback called'
     }
+  }
+  tap(tapFunc) {
+    this.tap = tapFunc
+    return this
   }
 }
 
 function createMock(name, structure) {
   if (structure === FUNCTION) {
     return mockFunction(name)
+  }
+  if (structure instanceof Spy) {
+    structure.setName(name)
+    return structure.callee()
   }
   const ret = {}
   const mockFunctions = []
@@ -96,7 +107,7 @@ function mockFunction(name) {
   }
   mock.verify = function() {
     if (callIndex !== expectedCalls.length) {
-      throw new Error('More calls expected than actually called')
+      throw new Error(`${name}: More calls expected ${expectedCalls.length} than actually called (${callIndex})`)
     }
     if (messages.length) {
       throw new Error(
@@ -112,34 +123,45 @@ function createMockFunc(name) {
   return mock(name, FUNCTION)
 }
 
-function spy(name, response, logger) {
-  const mock = function() {
-    const result = _.isFunction(response)
-      ? response.apply(this, arguments)
-      : response
-    if (logger) {
-      logger(arguments, result, name)
-    }
-    return result
+class Spy {
+  constructor(response, logger) {
+    this.response = response
+    this.logger = logger || console.log
   }
-  mock.replyWith = function(newResponse) {
-    response = newResponse
+  callee() {
+    const self = this
+    return function() {
+      const result = _.isFunction(self.response)
+        ? self.response.apply(this, arguments)
+        : self.response
+      if (self.logger) {
+        self.logger(arguments, result, self.name)
+      }
+      return result
+    }
+  }
+  setName(name) {
+    this.name = name
     return this
   }
-  mock.verify = function() {}
-  return mock
+  andReply(response) {
+    this.response = response
+    return this
+  }
+  verify() {
+  }
 }
 
-function logCalls(name, response) {
-  return spy(name, response, function(args) {
-    console.log(`${name} called with ${JSON.stringify(args)}`)
-  })
+function logIt(logger) {
+  return new Spy(null, logger)
 }
 
 module.exports = {
   mock: createMock,
   mockFunc: createMockFunc,
-  spy: spy,
+  Spy: Spy,
+  spy: arg => new Spy(arg),
+  logIt: logIt,
   func: FUNCTION,
   anything: ANYTHING,
   promise: function(value) {
