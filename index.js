@@ -16,6 +16,13 @@ class ExpectedCall {
     this.returnValue = value
     return this
   }
+  andThrow(error) {
+    if (this.whenCalled) {
+      throw new Error('Behavior already specified for this call')
+    }
+    this.whenCalled = 'fail'
+    this.throwError = error
+  }
   andCallback(argumentIndex, callbackArguments) {
     if (this.whenCalled) {
       throw new Error('Behavior already specified for this call')
@@ -44,6 +51,9 @@ class ExpectedCall {
     this.called = true
     if (this.whenCalled === 'return') {
       return { result: this.returnValue }
+    }
+    if (this.whenCalled === 'fail') {
+      throw this.throwError
     }
     if (this.whenCalled === 'callback') {
       args[this.argumentIndex].apply(that, this.callbackArguments)
